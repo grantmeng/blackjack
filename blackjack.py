@@ -32,6 +32,7 @@ deck = ["2♠️","2♥️","2♢","2♣️","3♠️","3♥️","3♢","3♣️
         "Q♠️","Q♥️","Q♢","Q♣️","K♠️","K♥️","K♢","K♣️","A♠️","A♥️","A♢","A♣️"]
 '''
 deck = blackjackclasses.Deck()
+print(deck)
 player,dealer = [],[]
 
 #Card distribution
