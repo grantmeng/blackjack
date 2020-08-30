@@ -1,6 +1,6 @@
 import random
 import sys
-import blackjackclasses
+from blackjackclasses import *
 
 #Check if hand is natural 21 or not
 def natural(hand):
@@ -31,8 +31,7 @@ deck = ["2♠️","2♥️","2♢","2♣️","3♠️","3♥️","3♢","3♣️
         "9♢","9♣️","10♠️","10♥️","10♢","10♣️","J♠️","J♥️","J♢","J♣️",
         "Q♠️","Q♥️","Q♢","Q♣️","K♠️","K♥️","K♢","K♣️","A♠️","A♥️","A♢","A♣️"]
 '''
-deck = blackjackclasses.Deck()
-print(deck)
+deck = Deck()
 player,dealer = [],[]
 
 #Card distribution
