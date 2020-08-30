@@ -32,15 +32,16 @@ deck = ["2♠️","2♥️","2♢","2♣️","3♠️","3♥️","3♢","3♣️
         "Q♠️","Q♥️","Q♢","Q♣️","K♠️","K♥️","K♢","K♣️","A♠️","A♥️","A♢","A♣️"]
 '''
 deck = Deck()
-player,dealer = [],[]
+deck.shuffle()
+dealer, player1 = Player('Grant'), Player('Xiang')
 
 #Card distribution
-random.shuffle(deck)
 for _ in range(2):
-    player.append(deck.pop())
-    dealer.append(deck.pop())
-print("Your cards are",player)
-print("One of the dealer's cards is",[str(dealer[0])])
+    dealer.draw(deck)
+    player1.draw(deck)
+for player in (dealer, player1):
+    player.showHandbySuit()
+    print()    
 
 p,d,ptotal,dtotal = "",True,total(player,False),total(dealer,True)
 
