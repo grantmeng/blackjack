@@ -20,11 +20,11 @@ class Deck:
         self.cards = []
         for suit in (Card.HEARTS, Card.SPADES, Card.CLUBS, Card.DIAMONDS):
             self.cards.append(Card('A', suit, 1))
-            for value in range(2, 11):
-                self.cards.append(Card(str(value), suit, value))
             self.cards.append(Card('J', suit, 11))
             self.cards.append(Card('Q', suit, 12))
             self.cards.append(Card('K', suit, 13))
+            for value in range(2, 11):
+                self.cards.append(Card(str(value), suit, value))
 
     def shuffle(self):
         for i in range(len(self.cards)):
@@ -67,10 +67,30 @@ class Player:
         for suit in cards:
             print('{} : {}'.format(suit, ' '.join(cards[suit])))
 
-    def calPoints(self):
-        res = 0
+    def getPoints(self):
+        points = [0]
         for card in self.hand:
-            res += card.value
+            newPoints = []
+            cardVal = 10 if card.value >= 11 else card.value
+            if cardVal == 1:
+                for i in range(len(points)):
+                    if points[i] + 1 <= 21:
+                        newPoints.append(points[i] + 1)
+                for i in range(len(points)):
+                    if points[i] + 11 <= 21:
+                        newPoints.append(points[i] + 11)
+            else:
+                for i in range(len(points)):
+                    if points[i] + cardVal <= 21:
+                        newPoints.append(points[i] + cardVal)
+            points = newPoints
+        res = float('-inf') # default set as bursted
+        if points:
+            res = max(points)
+            if res == 21 and len(self.hand) == 2: # check natural blackjack
+                if (self.hand[0].value == 1 and self.hand[1].value >= 11) or \
+                   (self.hand[1].value == 1 and self.hand[0].value >= 11): # natural blackjack
+                    res = float('inf')
         print('Points: {}'.format(res))
         return res
 
@@ -81,12 +101,12 @@ if __name__ == "__main__":
     bonnie = Player('Bonnie')
     xiang = Player('Xiang')
     liang = Player('Liang')
-    for i in range(2):
+    for _ in range(2):
         grant.draw(deck)
         bonnie.draw(deck)
         xiang.draw(deck)
         liang.draw(deck)
     for player in (grant, bonnie, xiang, liang):
-        player.showHandbySuit()
-        player.calPoints()
+        player.showHand()
+        player.getPoints()
         print()
