@@ -91,7 +91,6 @@ class Player:
                 if (self.hand[0].value == 1 and self.hand[1].value >= 11) or \
                    (self.hand[1].value == 1 and self.hand[0].value >= 11): # natural blackjack
                     res = float('inf')
-        print('Points: {}'.format(res))
         return res
 
 if __name__ == "__main__":
