@@ -55,7 +55,7 @@ class Player:
         self.hand += deck.drawCard(n)
 
     def showHand(self):
-        print('{}'.format(self.name))
+        #print('{}'.format(self.name))
         for card in self.hand:
             card.show()
 

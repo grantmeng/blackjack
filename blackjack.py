@@ -4,7 +4,7 @@ from blackjackclasses import *
 
 deck = Deck()
 deck.shuffle()
-dealer, player1 = Player('Grant'), Player('Xiang')
+dealer, player1 = Player('Grant'), Player('Liang')
 
 #Card distribution
 for _ in range(2):
@@ -13,7 +13,7 @@ for _ in range(2):
 for player in (dealer, player1):
     player.showHand()
     player.getPoints()
-    print()    
+    print()
 
 if dealer.getPoints() == float('inf'):
     print("The dealer has won with a natural BlackJack!")
