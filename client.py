@@ -13,6 +13,7 @@ while True:
     try:
         server_msg = client.recv(2048).decode()
         print(server_msg)
-        name = input()
-        client.send(str.encode(name))
+        player_msg = None
+        while not player_msg: player_msg = input()
+        client.send(str.encode(player_msg))
     except socket.error as e: print(e)
