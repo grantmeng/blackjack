@@ -13,33 +13,39 @@ print("Waiting for player to join")
 
 deck = Deck(); deck.shuffle()
 players = []
+connections = []
 
 def threaded_client(conn):
     # send message to the player.
-    # conn.send(players[player])
-    response = ""
+    conn.send(str.encode('Welcome to Blackjack! Please input your name:'))
     while True:
         try:
-            name = conn.recv(2048).decode()
-            if not name:
-                print("No player name")
-                break
-            player = Player(name)
-            players.append(player)
-            player.draw(deck, 2)
-            cards = player.showHand()
-            print('Player {} joined and got two cards:'.format(name))
-            conn.send('Hi')
-            player_response = conn.recv(2048).decode()
-            print(players)
-        except: break
+            player_msg = conn.recv(2048).decode()
+            if not player_msg:
+                print("No message from player, remove it")
+                if conn in connections: connections.remove(conn)
+            elif player_msg == 'Hit':
+                pass
+            elif player_msg == 'Stand':
+                pass
+            else: # player input name
+                player = Player(player_msg)
+                player.draw(deck, 2)
+                players.append(player)
+                hand = player.getHand()
+                print('{} joined and got two cards: {}'.format(player_msg, str(hand)))
+        except: continue
 
     # close the connection with the player
     # conn.close()
+    # if conn in connections: connections.remove(conn)
 
 while True:
     # establish connection with client.
     conn, addr = s.accept()
-    print("Connected to:", addr)
-
+    print("{} is connected".format(addr[0]))
+    connections.append(conn)
     start_new_thread(threaded_client, (conn,))
+
+#conn.close()
+#s.close()

@@ -54,6 +54,12 @@ class Player:
     def draw(self, deck, n=1):
         self.hand += deck.drawCard(n)
 
+    def getHand(self):
+        cards = []
+        for card in self.hand:
+            cards.append('{} {}'.format(card.suit, card.name))
+        return ' '.join(cards)
+
     def showHand(self):
         #print('{}'.format(self.name))
         for card in self.hand:
