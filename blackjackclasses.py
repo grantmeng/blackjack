@@ -15,6 +15,9 @@ class Card:
     def show(self):
         print('{} {}'.format(self.suit, self.name), end=' ')
 
+    def get(self):
+        return '{} {}'.format(self.suit, self.name)
+
 class Deck:
     def __init__(self):
         self.cards = []
@@ -52,7 +55,9 @@ class Player:
         self.hand = []
 
     def draw(self, deck, n=1):
-        self.hand += deck.drawCard(n)
+        new_hand = deck.drawCard(n)
+        self.hand += new_hand
+        return new_hand
 
     def getHand(self):
         cards = []
