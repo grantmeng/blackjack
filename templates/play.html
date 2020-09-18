@@ -1,0 +1,9 @@
+<html>
+   <body>
+      <p>Welcome to Blackjack, {{player.name}} ({{player.ip}})!</p>
+      <p>Your hand: {{player.showHand()}}</p>
+      {% for name, p in players.items() %}
+         <p>{{name}}: {{p.showHand()}}</p>
+      {% endfor %}
+   </body>
+</html>

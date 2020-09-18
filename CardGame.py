@@ -1,5 +1,6 @@
 import random
 import collections
+from Rules import *
 
 class Card:
     SPADES = chr(9824)
@@ -50,8 +51,9 @@ class Deck:
             card.show()
 
 class Player:
-    def __init__(self, name):
+    def __init__(self, name, rule=Blackjack):
         self.name = name
+        self.rule = rule()
         self.hand = []
 
     def draw(self, deck, n=1):
@@ -60,49 +62,32 @@ class Player:
         return new_hand
 
     def getHand(self):
-        cards = []
-        for card in self.hand:
-            cards.append('{} {}'.format(card.suit, card.name))
-        return ' '.join(cards)
+        return self.hand
     
     def showHand(self):
-        #print('{}'.format(self.name))
+        cards = []
         for card in self.hand:
-            card.show()
+            cards.append('{}{}'.format(card.suit, card.name))
+        return ','.join(cards)
 
-    def showHandbySuit(self):
-        print('{}'.format(self.name))
+    def getHandbySuit(self):
         cards = collections.defaultdict(list)
         for card in self.hand:
             cards[card.suit].append(card.name)
-        for suit in cards:
-            print('{} : {}'.format(suit, ' '.join(cards[suit])))
+        return cards
 
-    def getPoints(self):
-        points = [0]
+    def showHandBySuit(self):
+        cards = collections.defaultdict(list)
         for card in self.hand:
-            newPoints = []
-            cardVal = 10 if card.value >= 11 else card.value
-            if cardVal == 1:
-                for i in range(len(points)):
-                    if points[i] + 1 <= 21:
-                        newPoints.append(points[i] + 1)
-                for i in range(len(points)):
-                    if points[i] + 11 <= 21:
-                        newPoints.append(points[i] + 11)
-            else:
-                for i in range(len(points)):
-                    if points[i] + cardVal <= 21:
-                        newPoints.append(points[i] + cardVal)
-            points = newPoints
-        res = float('-inf') # default set as bursted
-        if points:
-            res = max(points)
-            if res == 21 and len(self.hand) == 2: # check natural blackjack
-                if (self.hand[0].value == 1 and self.hand[1].value >= 11) or \
-                   (self.hand[1].value == 1 and self.hand[0].value >= 11): # natural blackjack
-                    res = float('inf')
-        return res
+            cards[card.suit].append(card.name)
+        hand = ''
+        for suit in cards:
+            hand += '{}:{}; '.format(suit, ','.join(cards[suit]))
+        return hand
+
+    def points(self):
+        return self.rule.getPoints(self)
+        
 
 if __name__ == "__main__":
     deck = Deck()
@@ -111,12 +96,12 @@ if __name__ == "__main__":
     bonnie = Player('Bonnie')
     xiang = Player('Xiang')
     liang = Player('Liang')
-    for _ in range(2):
+    for _ in range(3):
         grant.draw(deck)
         bonnie.draw(deck)
         xiang.draw(deck)
         liang.draw(deck)
     for player in (grant, bonnie, xiang, liang):
-        player.showHand()
-        player.getPoints()
-        print()
+        print('{}: {}'.format(player.name, player.showHand()))
+        print('{}: {}'.format(player.name, player.showHandBySuit()))
+        print(player.points())
