@@ -1,6 +1,6 @@
 <html>
    <body>
-      <p>Welcome to Blackjack game, {{ players. }}!</p>
+      <p>Welcome to Blackjack game, {{ player }}!</p>
       <p>Your hand: {{ player.getHand() }}</p>
       <p>Dealer's hand: {{ players['Dealer'].getHand() }}</p>
       {% for name, p in players.items() %}
