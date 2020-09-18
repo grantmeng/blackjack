@@ -64,7 +64,7 @@ class Player:
         for card in self.hand:
             cards.append('{} {}'.format(card.suit, card.name))
         return ' '.join(cards)
-
+    
     def showHand(self):
         #print('{}'.format(self.name))
         for card in self.hand:
