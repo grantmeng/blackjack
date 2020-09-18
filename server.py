@@ -5,8 +5,8 @@ app = Flask(__name__)
 
 deck = Deck()
 deck.shuffle()
-dealer = Player('Dealer')
-for _ in range(2): dealer.draw(deck)
+players = {'Dealer': Player('Dealer')}
+for _ in range(2): players['Dealer'].draw(deck)
 
 @app.route('/')
 def index():
@@ -15,9 +15,12 @@ def index():
 @app.route('/join', methods=['POST'])
 def join():
     username = request.form['username']
+    if username in players:
+        return render_template('join.html', err_msg='%s already exists.' % username)
     player = Player(username)
     for _ in range(2): player.draw(deck)
-    return render_template('blackjack.html', player=player, dealer=dealer)
+    players[username] = player
+    return render_template('blackjack.html', players=players, player=player)
 
 if __name__ == '__main__':
    app.run(SERVER, PORT, DEBUG)

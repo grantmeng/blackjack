@@ -1,6 +1,7 @@
 <html>
    <body>
       <p>Welcome to Blackjack game, {{ player.name }}!</p>
-      <p>Your current hand: {{ player.getHand() }}</p>
+      <p>Your hand: {{ player.getHand() }}</p>
+      <p>Dealer's hand: {{ players['Dealer'].getHand() }}</p>
    </body>
 </html>
