@@ -1,9 +1,17 @@
 <html>
    <body>
-      <p>Welcome to Blackjack, {{player.name}} ({{player.ip}})!</p>
-      <p>Your hand: {{player.showHand()}}</p>
-      {% for name, p in players.items() %}
-         <p>{{name}}: {{p.showHand()}}</p>
-      {% endfor %}
+      <center>
+         <h1>Welcome to Blackjack, {{player.name}}! (IP: {{player.ip}})</h1>
+         <h3>Your current hand: {{player.showHand()}}, points: {{player.points()}}</h3>
+      </center>
+      <font color=blue size="6">
+         {% for name, p in players.items() %}
+            {% if name == player.name %}
+               <p>You: {{p.showHand()}}, points: {{p.points()}}</p>
+            {% else %}
+               <p>{{name}}: {{p.showHand()}}, points: {{p.points()}}</p>
+            {% endif %}
+         {% endfor %}
+      </font>
    </body>
 </html>
