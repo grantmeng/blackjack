@@ -86,7 +86,7 @@ class Player:
         return hand
 
     def points(self):
-        return self.rule.getPoints(self)
+        return self.rule.getPoints(self.hand)
         
 
 if __name__ == "__main__":
