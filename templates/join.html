@@ -1,11 +1,15 @@
 <html>
+   <head>
+      <link rel="stylesheet" href="/static/css/join.css">
+   </head>
    <body>
-      <center><h1>
-         <form action = "/join" method="post">
-            <p>Enter Your Name:</p>
-            <p><input type="text" name="username" /><input type="submit" value="Join" /></p>
-            <p><font color=red>{{err_msg}}</font></p>
+      <div id="join">
+         <h1>Welcome to Blackjack!</h1></h1>
+         <form action="/join" method="post">
+            <input id="username" name="username" type="text" placeholder="Enter your name">
+            <input id="submit" type="submit" value="Join" /></p>
          </form>
-      </h1></center>
+         <p><font color=red>{{err_msg}}</font></p>
+      </div>
    </body>
 </html>
