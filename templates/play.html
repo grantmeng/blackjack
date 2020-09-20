@@ -6,10 +6,8 @@
       </center>
       <font color=blue size="6">
          {% for name, p in players.items() %}
-            {% if name == player.name %}
-               <p>You: {{p.showHand()}}, points: {{p.points()}}</p>
-            {% else %}
-               <p>{{name}}: {{p.showHand()}}, points: {{p.points()}}</p>
+            {% if name != player.name %}
+               <p>{{name}}: {{p.showFirstCard()}}</p>
             {% endif %}
          {% endfor %}
       </font>

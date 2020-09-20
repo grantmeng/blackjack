@@ -70,6 +70,11 @@ class Player:
             cards.append('{}{}'.format(card.suit, card.name))
         return ','.join(cards)
 
+    def showFirstCard(self):
+        if self.hand:
+            return '{}{}'.format(self.hand[0].suit, self.hand[0].name)
+        return ''
+
     def getHandbySuit(self):
         cards = collections.defaultdict(list)
         for card in self.hand:
