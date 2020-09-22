@@ -4,25 +4,30 @@
    </head>
    <body>
       <center>
-         <div id="main">
-            <h1>You joined as {{cur_user}} ({{players[cur_user].ip}})</h1>
-            <h2>Your current hand: {{players[cur_user].showHand()}}, points: {{players[cur_user].points()}}</h2>
-            {% if not start_game %}
-               <h3>Waiting for players ...</h3>
-               <form action="/start" method="post">
-                  <input id="submit" type="submit" value="START" /></p>
-               </form>
-            {% else %}
-               <h1>Game has started.</h1>
-            {% endif %} 
+         <div class="header">
+            <h5>You joined as {{cur_user}} ({{players[cur_user].ip}})</h5>
+            <p>Your hand: {{players[cur_user].showHand()}}<br>
+            Points: {{players[cur_user].points()}}</p>
          </div>
       </center>
-      <font color=blue size="6">
+      <font color=blue size="7">
          {% for name, p in players.items() %}
             {% if name != cur_user %}
                <p>{{name}}: {{p.showFirstCard()}}</p>
             {% endif %}
          {% endfor %}
       </font>
+      <center>
+         <div class="header">
+            {% if not start_game %}
+               <h5>Waiting for players ...</h5>
+               <form action="/start" method="post">
+                  <input class="submit" type="submit" value="START" />
+               </form>
+            {% else %}
+               <h5>Game has started.</h5>
+            {% endif %}
+         </div>
+      </center>
    </body>
 </html>
