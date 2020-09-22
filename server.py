@@ -1,47 +1,47 @@
 from config import *
 from CardGame import *
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, url_for, session, current_app
 from flask_session import Session
 app = Flask(__name__)
 app.secret_key = 'blackjack' # has to be set to use session, which is a client side session
-#app.config.from_object(__name__)
-#server_session = Session()
-#server_session.init_app(app)
 
 deck = Deck(); deck.shuffle()
 players = {}
-start_game = False
+
+# initialize game status, this is application wide variable/data, shared among all other users/requests
+with app.app_context():
+    current_app.start_game = False
 
 @app.route('/')
 def index():
-    session['cur_user'] = None # initialize curren user name
-    session['start_game'] = False # initialize game status
+    session['cur_user'] = None # initialize curren user name, this is client session
     return render_template('join.html')
 
 @app.route('/join', methods=['POST'])
 def join():
     if session['cur_user']: # current user already logged in
-        return render_template('lobby.html', cur_user=session['cur_user'], players=players, start_game=start_game)
-    session['cur_user'] = request.form['username']
+        return render_template('lobby.html', cur_user=session['cur_user'], players=players, start_game=current_app.start_game)
+    username = request.form['username']
     ip = request.remote_addr
-    if session['cur_user'] in players:
-        if ip != players[session['cur_user']].ip:
-            return render_template('join.html', err_msg='Player %s already exists, use another name.' % session['cur_user'])
-        else:
-            return render_template('lobby.html', cur_user=session['cur_user'], players=players, start_game=start_game)
+    if username in players:
+        if ip != players[username].ip: # new user with duplicate name
+            return render_template('join.html', err_msg='Player %s already exists, use another name.' % username)
+        else: # same user logged in
+            return render_template('lobby.html', cur_user=username, players=players, start_game=current_app.start_game)
     # create a new player
     if len(players) >= MAX_PLAYERS:
         return render_template('join.html', err_msg='Already reached maximum %s players.' % MAX_PLAYERS)
-    player = Player(session['cur_user']); player.ip = ip
+    session['cur_user'] = username # set current user session
+    player = Player(username); player.ip = ip
     for _ in range(2): player.draw(deck)
-    players[session['cur_user']] = player
-    return render_template('lobby.html', cur_user=session['cur_user'], players=players, start_game=start_game)
+    players[username] = player
+    return render_template('lobby.html', cur_user=username, players=players, start_game=current_app.start_game)
 
 @app.route('/start', methods=['POST'])
 def start():
-    start_game = True
+    current_app.start_game = True
+    return render_template('lobby.html', cur_user=session['cur_user'], players=players, start_game=True)
     #return redirect(url_for('join'))
-    return render_template('lobby.html', cur_user=session['cur_user'], players=players, start_game=start_game)
 
 if __name__ == '__main__':
     app.run(SERVER, PORT, DEBUG)
