@@ -5,12 +5,11 @@
    <body>
       <center>
          <div id="main">
-            <h1>You joined as {{player.name}} ({{player.ip}})</h1>
-            <h2>Your current hand: {{player.showHand()}}, points: {{player.points()}}</h2>
-            {% if not startgame %}
-               <h3>Waiting for players...</h3>
+            <h1>You joined as {{cur_user}} ({{players[cur_user].ip}})</h1>
+            <h2>Your current hand: {{players[cur_user].showHand()}}, points: {{players[cur_user].points()}}</h2>
+            {% if not start_game %}
+               <h3>Waiting for players ...</h3>
                <form action="/start" method="post">
-                  <input id="username" name="username" type="hidden" value="{{player.name}}"/>
                   <input id="submit" type="submit" value="START" /></p>
                </form>
             {% else %}
@@ -20,7 +19,7 @@
       </center>
       <font color=blue size="6">
          {% for name, p in players.items() %}
-            {% if name != player.name %}
+            {% if name != cur_user %}
                <p>{{name}}: {{p.showFirstCard()}}</p>
             {% endif %}
          {% endfor %}
