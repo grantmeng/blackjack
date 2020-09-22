@@ -1,7 +1,6 @@
 from config import *
 from CardGame import *
 from flask import Flask, request, render_template, redirect, url_for, session, current_app
-from flask_session import Session
 app = Flask(__name__)
 app.secret_key = 'blackjack' # has to be set to use session, which is a client side session
 
