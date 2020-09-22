@@ -5,6 +5,7 @@ app = Flask(__name__)
 
 deck = Deck(); deck.shuffle()
 players = {}; playerIPs = {}
+startgame = False
 
 @app.route('/')
 def index():
@@ -18,11 +19,18 @@ def join():
         if ip != players[username].ip:
             return render_template('join.html', err_msg='Player %s already exists, use another name.' % username)
         else:
-            return render_template('play.html', players=players, player=players[username])
+            return render_template('lobby.html', players=players, player=players[username])
     player = Player(username); player.ip = ip
     for _ in range(2): player.draw(deck)
     players[username] = player
-    return render_template('play.html', players=players, player=player)
+    return render_template('lobby.html', players=players, player=player)
+
+@app.route('/start', methods=['POST'])
+def start():
+    username = request.form['username']
+    return render_template('lobby.html', players=players, player=players[username], startgame=True)
+
+
 
 if __name__ == '__main__':
-   app.run(SERVER, PORT, DEBUG)
+    app.run(SERVER, PORT, DEBUG)

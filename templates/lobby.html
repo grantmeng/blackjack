@@ -1,0 +1,29 @@
+<html>
+   <head>
+      <link rel="stylesheet" href="/static/css/main.css">
+   </head>
+   <body>
+      <center>
+         <div id="main">
+            <h1>You joined as {{player.name}} ({{player.ip}})</h1>
+            <h2>Your current hand: {{player.showHand()}}, points: {{player.points()}}</h2>
+            {% if not startgame %}
+               <h3>Waiting for players...</h3>
+               <form action="/start" method="post">
+                  <input id="username" name="username" type="hidden" value="{{player.name}}"/>
+                  <input id="submit" type="submit" value="START" /></p>
+               </form>
+            {% else %}
+               <h1>Game has started.</h1>
+            {% endif %} 
+         </div>
+      </center>
+      <font color=blue size="6">
+         {% for name, p in players.items() %}
+            {% if name != player.name %}
+               <p>{{name}}: {{p.showFirstCard()}}</p>
+            {% endif %}
+         {% endfor %}
+      </font>
+   </body>
+</html>
