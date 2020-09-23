@@ -75,7 +75,8 @@ def restart():
 def hit():
     player = current_app.players[session['cur_user']]
     for _ in range(1): player.draw(current_app.deck)
-    current_app.players_order.append(current_app.players_order.pop(0))
+    if player.points() == float("-inf"):
+        current_app.players_order.pop(0)    
     return render_template('lobby.html', 
         cur_user=session['cur_user'], 
         players=current_app.players, 

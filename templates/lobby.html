@@ -7,7 +7,13 @@
          <div class="header">
             <h5>You joined as {{cur_user}} ({{players[cur_user].ip}})</h5>
             <p>Your hand: {{players[cur_user].showHand()}}<br>
-            Points: {{players[cur_user].points()}}</p>
+            {% if players[cur_user].points() == float('-inf') %}
+               <p>Points: Busted</p>
+            {% elif players[cur_user].points() == float('inf') %}
+               <p>Points: BlackJack!</p>
+            {% else %}
+               <p>Points: {{players[cur_user].points()}}</p>
+            {% endif %}
          </div>
       </center>
       <font color=blue size="7">
