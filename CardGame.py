@@ -21,7 +21,7 @@ class Card:
 
 class Deck:
     def __init__(self):
-        self.cards = []
+        self.cards, self.done = [], []
         for suit in (Card.HEARTS, Card.SPADES, Card.CLUBS, Card.DIAMONDS):
             self.cards.append(Card('A', suit, 1))
             self.cards.append(Card('J', suit, 11))
@@ -31,6 +31,8 @@ class Deck:
                 self.cards.append(Card(str(value), suit, value))
 
     def shuffle(self):
+        self.cards += self.done
+        self.done = []
         for i in range(len(self.cards)):
             r = random.randint(0, 51) # inclusive of 51
             self.cards[i], self.cards[r] = self.cards[r], self.cards[i]
@@ -38,17 +40,17 @@ class Deck:
     def drawCard(self, n=1):
         hand = []
         for _ in range(n):
-            if self.isEmpty():
-                break
-            hand.append(self.cards.pop())
+            if self.isEmpty(): break
+            card = self.cards.pop()
+            hand.append(card)
+            self.done.append(card)
         return hand
 
     def isEmpty(self):
         return self.cards == []
 
     def show(self):
-        for card in self.cards:
-            card.show()
+        for card in self.cards: card.show()
 
 class Player:
     def __init__(self, name, rule=Blackjack):

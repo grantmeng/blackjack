@@ -25,7 +25,13 @@
                   <input class="submit" type="submit" value="START" />
                </form>
             {% else %}
-               <h5>Game has started.</h5>
+               <h5>Game has started: {{order}}</h5>
+               {% if cur_user == order[0] %}
+                  Your turn: <form action="/hit" method="post"><input class="submit" type="submit" value="HIT" /></form> or
+                             <form action="/stand" method="post"><input class="submit" type="submit" value="STAND" />
+               {% else %}
+                  Waiting for {{order[0]}} ...
+               {% endif %}
             {% endif %}
          </div>
       </center>

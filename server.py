@@ -1,14 +1,15 @@
+import random
 from config import *
 from CardGame import *
 from flask import Flask, request, render_template, redirect, url_for, session, current_app
+
 app = Flask(__name__)
 app.secret_key = 'blackjack' # has to be set to use session, which is a client side session
-
-deck = Deck(); deck.shuffle()
-players = {}
-
-# initialize game status, this is application wide variable/data, shared among all other users/requests
+# initialize application wide variables, which are shared among all users/requests
 with app.app_context():
+    current_app.deck = Deck(); current_app.deck.shuffle()
+    current_app.players = {}
+    current_app.players_order = []
     current_app.start_game = False
 
 @app.route('/')
@@ -19,28 +20,76 @@ def index():
 @app.route('/join', methods=['POST'])
 def join():
     if session['cur_user']: # current user already logged in
-        return render_template('lobby.html', cur_user=session['cur_user'], players=players, start_game=current_app.start_game)
+        return render_template('lobby.html', 
+            cur_user=session['cur_user'], 
+            players=current_app.players, 
+            order=current_app.players_order,
+            start_game=current_app.start_game)
     username = request.form['username']
     ip = request.remote_addr
-    if username in players:
-        if ip != players[username].ip: # new user with duplicate name
+    if username in current_app.players:
+        if ip != current_app.players[username].ip: # new user with duplicate name
             return render_template('join.html', err_msg='Player %s already exists, use another name.' % username)
         else: # same user logged in
-            return render_template('lobby.html', cur_user=username, players=players, start_game=current_app.start_game)
+            return render_template('lobby.html', 
+                cur_user=username, 
+                players=current_app.players, 
+                order=current_app.players_order,
+                start_game=current_app.start_game)
     # create a new player
-    if len(players) >= MAX_PLAYERS:
+    if len(current_app.players) >= MAX_PLAYERS:
         return render_template('join.html', err_msg='Already reached maximum %s players.' % MAX_PLAYERS)
     session['cur_user'] = username # set current user session
     player = Player(username); player.ip = ip
-    for _ in range(2): player.draw(deck)
-    players[username] = player
-    return render_template('lobby.html', cur_user=username, players=players, start_game=current_app.start_game)
+    for _ in range(2): player.draw(current_app.deck)
+    current_app.players[username] = player
+    current_app.players_order.append(username)
+    return render_template('lobby.html', 
+        cur_user=username, 
+        players=current_app.players, 
+        order=current_app.players_order,
+        start_game=current_app.start_game)
 
 @app.route('/start', methods=['POST'])
 def start():
     current_app.start_game = True
-    return render_template('lobby.html', cur_user=session['cur_user'], players=players, start_game=True)
-    #return redirect(url_for('join'))
+    random.shuffle(current_app.players_order)
+    return render_template('lobby.html', 
+        cur_user=session['cur_user'], 
+        players=current_app.players, 
+        order=current_app.players_order, 
+        start_game=True)
+
+@app.route('/restart', methods=['POST'])
+def restart():
+    current_app.deck.shuffle()
+    current_app.start_game = False
+    random.shuffle(current_app.players_order)
+    return render_template('lobby.html', 
+        cur_user=session['cur_user'], 
+        players=current_app.players, 
+        order=current_app.players_order, 
+        start_game=False)
+
+@app.route('/hit', methods=['POST'])
+def hit():
+    player = current_app.players[session['cur_user']]
+    for _ in range(1): player.draw(current_app.deck)
+    current_app.players_order.append(current_app.players_order.pop(0))
+    return render_template('lobby.html', 
+        cur_user=session['cur_user'], 
+        players=current_app.players, 
+        order=current_app.players_order,
+        start_game=current_app.start_game)
+
+@app.route('/stand', methods=['POST'])
+def stand():
+    current_app.players_order.append(current_app.players_order.pop(0))
+    return render_template('lobby.html', 
+        cur_user=session['cur_user'], 
+        players=current_app.players, 
+        order=current_app.players_order,
+        start_game=current_app.start_game)
 
 if __name__ == '__main__':
     app.run(SERVER, PORT, DEBUG)
