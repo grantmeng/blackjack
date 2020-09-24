@@ -5,21 +5,21 @@
    <body>
       <center>
          <div class="header">
-            <h5>You joined as {{cur_user}} ({{players[cur_user].ip}})</h5>
-            Your hand: {{players[cur_user].showHand()}}<br>
+            <h5>You joined as {{me}} ({{players[me].ip}})</h5>
+            Your hand: {{players[me].showHand()}}<br>
             Points: 
-            {% if players[cur_user].points() < 0 %}
+            {% if players[me].points() < 0 %}
                Busted
-            {% elif players[cur_user].points() > 999 %}
+            {% elif players[me].points() > 999 %}
                BlackJack!
             {% else %}
-               {{players[cur_user].points()}}
+               {{players[me].points()}}
             {% endif %}
          </div>
       </center>
       <font color=blue size="7">
          {% for name, p in players.items() %}
-            {% if name != cur_user %}
+            {% if name != me %}
                <p>{{name}}: {{p.showFirstCard()}}</p>
             {% endif %}
          {% endfor %}
@@ -33,7 +33,7 @@
                </form>
             {% else %}
                <h5>Game has started: {{players_order}}, current order: {{cur_order}}</h5>
-               {% if cur_user == players_order[cur_order] %}
+               {% if me == players_order[cur_order] %}
                   Your turn: <form action="/hit" method="post"><input class="submit" type="submit" value="HIT" /></form>
                              <form action="/stand" method="post"><input class="submit" type="submit" value="STAND" />
                {% else %}

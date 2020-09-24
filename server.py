@@ -15,14 +15,14 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    session['cur_user'] = None # initialize curren user name, this is client session
+    session['me'] = None # initialize curren user name, this is client session
     return render_template('join.html')
 
 @app.route('/join', methods=['POST'])
 def join():
-    if session['cur_user']: # current user already logged in
+    if session['me']: # current user already logged in
         return render_template('lobby.html', 
-            cur_user=session['cur_user'], 
+            me=session['me'], 
             players=current_app.players, 
             players_order=current_app.players_order,
             cur_order=current_app.cur_order,
@@ -34,7 +34,7 @@ def join():
             return render_template('join.html', err_msg='Player %s already exists, use another name.' % username)
         else: # same user logged in
             return render_template('lobby.html', 
-                cur_user=username, 
+                me=username, 
                 players=current_app.players, 
                 players_order=current_app.players_order,
                 cur_order=current_app.cur_order,
@@ -42,13 +42,13 @@ def join():
     # create a new player
     if len(current_app.players) >= MAX_PLAYERS:
         return render_template('join.html', err_msg='Already reached maximum %s players.' % MAX_PLAYERS)
-    session['cur_user'] = username # set current user session
+    session['me'] = username # set current user session
     player = Player(username); player.ip = ip
     for _ in range(2): player.draw(current_app.deck)
     current_app.players[username] = player
     current_app.players_order.append(username)
     return render_template('lobby.html', 
-        cur_user=username, 
+        me=username, 
         players=current_app.players, 
         players_order=current_app.players_order,
         cur_order=current_app.cur_order,
@@ -60,7 +60,7 @@ def start():
         current_app.start_game = True
         random.shuffle(current_app.players_order)
     return render_template('lobby.html', 
-        cur_user=session['cur_user'], 
+        me=session['me'], 
         players=current_app.players, 
         players_order=current_app.players_order,
         cur_order=current_app.cur_order,
@@ -72,7 +72,7 @@ def restart():
     current_app.start_game = False
     random.shuffle(current_app.players_order)
     return render_template('lobby.html', 
-        cur_user=session['cur_user'], 
+        me=session['me'], 
         players=current_app.players, 
         players_order=current_app.players_order,
         cur_order=current_app.cur_order,
@@ -80,7 +80,14 @@ def restart():
 
 @app.route('/hit', methods=['POST'])
 def hit():
-    player = current_app.players[session['cur_user']]
+    player = current_app.players[session['me']]
+    if player.points() == float("-inf"):
+        return render_template('lobby.html', 
+            me=session['me'], 
+            players=current_app.players, 
+            players_order=current_app.players_order,
+            cur_order=current_app.cur_order,
+            start_game=current_app.start_game)       
     for _ in range(1): player.draw(current_app.deck)
     if player.points() == float("-inf"):
         if current_app.cur_order == len(current_app.players_order) - 1:
@@ -88,7 +95,7 @@ def hit():
         else:
             current_app.cur_order += 1
     return render_template('lobby.html', 
-        cur_user=session['cur_user'], 
+        me=session['me'], 
         players=current_app.players, 
         players_order=current_app.players_order,
         cur_order=current_app.cur_order,
@@ -97,13 +104,13 @@ def hit():
 @app.route('/stand', methods=['POST'])
 def stand():
     # order only changes if it's current user
-    if current_app.players_order[current_app.cur_order] == session['cur_user']:
+    if current_app.players_order[current_app.cur_order] == session['me']:
         if current_app.cur_order == len(current_app.players_order) - 1:
             current_app.cur_order = 0
         else:
             current_app.cur_order += 1
     return render_template('lobby.html', 
-        cur_user=session['cur_user'], 
+        me=session['me'], 
         players=current_app.players, 
         players_order=current_app.players_order,
         cur_order=current_app.cur_order,
