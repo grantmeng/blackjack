@@ -24,15 +24,12 @@ def index():
 
 @app.route('/result')
 def result():
+    winners = win()
     return render_template('result.html',
         me=session['me'],
         players=current_app.players, 
         players_order=current_app.players_order,
-        cur_order=current_app.cur_order,
-        start_game=current_app.start_game,
-        reply=current_app.reply)
-
-    
+        winners=winners)
 
 @app.route('/join', methods=['POST', 'GET'])
 def join():
@@ -113,11 +110,12 @@ def stand(data):
         socketio.emit('server done', {'msg': 'done'})
 
 def win():
-    w = max(current_app.players.values())
+    scores = [p.points() for p in current_app.players.values()]
+    w = max(scores)
     winners = []
-    for p in current_app.players:
+    for p in current_app.players.values():
         if p.points() == w:
-            winners.append(p)
+            winners.append(p.name)
     return winners
 
 if __name__ == '__main__':

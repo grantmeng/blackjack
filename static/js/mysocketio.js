@@ -24,7 +24,6 @@ $(document).ready(function() {
 
    // handle 'result page' event sent from server
    socket.on('result', function(msg) {
-      alert("didnt work");
       window.location.replace("/result")
    });
 });
