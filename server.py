@@ -102,6 +102,8 @@ def stand(data):
 
 @socketio.on('restart')   
 def restart(data):
+    current_app.reply = ''
+    current_app.cur_order = 0
     current_app.deck.shuffle()
     random.shuffle(current_app.players_order)
     for p in current_app.players.values():
