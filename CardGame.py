@@ -65,6 +65,9 @@ class Player:
 
     def getHand(self):
         return self.hand
+
+    def resetHand(self):
+        self.hand = []
     
     def showHand(self):
         cards = []

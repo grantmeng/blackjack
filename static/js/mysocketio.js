@@ -17,9 +17,19 @@ $(document).ready(function() {
       socket.emit('stand', 'stand');
    });
 
-   // handle 'server done' event sent from server
-   socket.on('server done', function(msg) {
+   // RESTART button was clicked
+   $("#restart").click(function () {
+      socket.emit('restart', 'restart');
+   });
+
+   // handle 'continue' event sent from server
+   socket.on('continue', function(msg) {
       location.reload();
+   });
+
+   // handle 'restart' event sent from server
+   socket.on('restart', function(msg) {
+      window.location.replace("/join");
    });
 
    // handle 'result page' event sent from server

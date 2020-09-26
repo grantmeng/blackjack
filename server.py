@@ -22,15 +22,6 @@ def index():
     session['me'] = None # initialize curren user name, this is client session
     return render_template('join.html')
 
-@app.route('/result')
-def result():
-    winners = win()
-    return render_template('result.html',
-        me=session['me'],
-        players=current_app.players, 
-        players_order=current_app.players_order,
-        winners=winners)
-
 @app.route('/join', methods=['POST', 'GET'])
 def join():
     if session['me']: # current user already logged in
@@ -74,7 +65,7 @@ def join():
 def start(data):
     current_app.start_game = True
     random.shuffle(current_app.players_order)
-    socketio.emit('server done', {'msg': 'done'})
+    socketio.emit('continue', {'msg': 'done'})
 
 @socketio.on('hit')
 def hit(data):
@@ -98,7 +89,7 @@ def hit(data):
             else:
                 current_app.cur_order += 1
         current_app.reply += 'got new card'
-    socketio.emit('server done', {'msg': 'done'})
+    socketio.emit('continue', {'msg': 'done'})
 
 @socketio.on('stand')   
 def stand(data):
@@ -107,7 +98,16 @@ def stand(data):
         socketio.emit('result', {'msg': 'done'})
     else:
         current_app.cur_order += 1
-        socketio.emit('server done', {'msg': 'done'})
+        socketio.emit('continue', {'msg': 'done'})
+
+@socketio.on('restart')   
+def restart(data):
+    current_app.deck.shuffle()
+    random.shuffle(current_app.players_order)
+    for p in current_app.players.values():
+        p.resetHand()
+        for _ in range(2): p.draw(current_app.deck)
+    socketio.emit('restart', {'msg': 'done'})
 
 def win():
     scores = [p.points() for p in current_app.players.values()]
@@ -116,7 +116,16 @@ def win():
     for p in current_app.players.values():
         if p.points() == w:
             winners.append(p.name)
-    return winners
+    return ', '.join(winners)
+
+@app.route('/result')
+def result():
+    winners = win()
+    return render_template('result.html',
+        me=session['me'],
+        players=current_app.players, 
+        players_order=current_app.players_order,
+        winners=winners)
 
 if __name__ == '__main__':
     #app.run(SERVER, PORT, DEBUG)

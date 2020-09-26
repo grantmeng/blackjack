@@ -29,12 +29,9 @@
       </font>
       <center>
          <div id='dynamic'>
-            Game Finished.
-            The winner(s) are:
-            {% for name in winners %}
-               <p>{{name}}</p>
-            {% endfor %}
+            Game finished. The winner(s) are: {{winders}}
          </div>
+         <p><input id="restart" class="submit" type="button" value="RESTART" /></p>
       </center>
    </body>
 </html>
