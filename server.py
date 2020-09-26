@@ -1,7 +1,8 @@
 import random
 from config import *
 from CardGame import *
-from flask import Flask, request, render_template, redirect, url_for, session, current_app
+from flask import Flask, request, render_template, url_for, session, current_app
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.secret_key = 'blackjack' # has to be set to use session, which is a client side session
@@ -12,13 +13,14 @@ with app.app_context():
     current_app.players_order = []
     current_app.start_game = False
     current_app.cur_order = 0
+socketio = SocketIO(app, logger=True)
 
 @app.route('/')
 def index():
     session['me'] = None # initialize curren user name, this is client session
     return render_template('join.html')
 
-@app.route('/join', methods=['POST'])
+@app.route('/join', methods=['POST', 'GET'])
 def join():
     if session['me']: # current user already logged in
         return render_template('lobby.html', 
@@ -54,67 +56,33 @@ def join():
         cur_order=current_app.cur_order,
         start_game=current_app.start_game)
 
-@app.route('/start', methods=['POST'])
-def start():
-    if not current_app.start_game:
-        current_app.start_game = True
-        random.shuffle(current_app.players_order)
-    return render_template('lobby.html', 
-        me=session['me'], 
-        players=current_app.players, 
-        players_order=current_app.players_order,
-        cur_order=current_app.cur_order,
-        start_game=True)
-
-@app.route('/restart', methods=['POST'])
-def restart():
-    current_app.deck.shuffle()
-    current_app.start_game = False
+@socketio.on('start')
+def start(data):
+    current_app.start_game = True
     random.shuffle(current_app.players_order)
-    return render_template('lobby.html', 
-        me=session['me'], 
-        players=current_app.players, 
-        players_order=current_app.players_order,
-        cur_order=current_app.cur_order,
-        start_game=False)
+    socketio.emit('server done', {'msg': 'done'})
 
-@app.route('/hit', methods=['POST'])
-def hit():
+@socketio.on('hit')
+def hit(data):
     player = current_app.players[session['me']]
-    if player.points() == float("-inf"):
-        return render_template('lobby.html', 
-            me=session['me'], 
-            players=current_app.players, 
-            players_order=current_app.players_order,
-            cur_order=current_app.cur_order,
-            start_game=current_app.start_game)       
-    for _ in range(1): player.draw(current_app.deck)
-    if player.points() == float("-inf"):
+    if player.points() == float("-inf") or player.points() == float("inf") \
+        or player.points() == 21: # busted or blackjack or 21 points, pass to next player
         if current_app.cur_order == len(current_app.players_order) - 1:
             current_app.cur_order = 0
         else:
             current_app.cur_order += 1
-    return render_template('lobby.html', 
-        me=session['me'], 
-        players=current_app.players, 
-        players_order=current_app.players_order,
-        cur_order=current_app.cur_order,
-        start_game=current_app.start_game)
-
-@app.route('/stand', methods=['POST'])
-def stand():
-    # order only changes if it's current user
-    if current_app.players_order[current_app.cur_order] == session['me']:
-        if current_app.cur_order == len(current_app.players_order) - 1:
-            current_app.cur_order = 0
-        else:
-            current_app.cur_order += 1
-    return render_template('lobby.html', 
-        me=session['me'], 
-        players=current_app.players, 
-        players_order=current_app.players_order,
-        cur_order=current_app.cur_order,
-        start_game=current_app.start_game)
+    else: # get new card
+        player.draw(current_app.deck)
+    socketio.emit('server done', {'msg': 'done'})
+    
+@socketio.on('stand')   
+def stand(data):
+    if current_app.cur_order == len(current_app.players_order) - 1:
+        current_app.cur_order = 0
+    else:
+        current_app.cur_order += 1
+    socketio.emit('server done', {'msg': 'done'})
 
 if __name__ == '__main__':
-    app.run(SERVER, PORT, DEBUG)
+    #app.run(SERVER, PORT, DEBUG)
+    socketio.run(app, host=SERVER, port=PORT, debug=True)
