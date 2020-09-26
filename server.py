@@ -13,6 +13,7 @@ with app.app_context():
     current_app.players_order = []
     current_app.start_game = False
     current_app.cur_order = 0
+    current_app.pre_player_act = ''
 socketio = SocketIO(app, logger=True)
 
 @app.route('/')
@@ -28,7 +29,8 @@ def join():
             players=current_app.players, 
             players_order=current_app.players_order,
             cur_order=current_app.cur_order,
-            start_game=current_app.start_game)
+            start_game=current_app.start_game,
+            pre_player_act=current_app.pre_player_act)
     username = request.form['username']
     ip = request.remote_addr
     if username in current_app.players:
@@ -40,7 +42,8 @@ def join():
                 players=current_app.players, 
                 players_order=current_app.players_order,
                 cur_order=current_app.cur_order,
-                start_game=current_app.start_game)
+                start_game=current_app.start_game,
+                pre_player_act=current_app.pre_player_act)
     # create a new player
     if len(current_app.players) >= MAX_PLAYERS:
         return render_template('join.html', err_msg='Already reached maximum %s players.' % MAX_PLAYERS)
@@ -54,7 +57,8 @@ def join():
         players=current_app.players, 
         players_order=current_app.players_order,
         cur_order=current_app.cur_order,
-        start_game=current_app.start_game)
+        start_game=current_app.start_game,
+        pre_player_act=current_app.pre_player_act)
 
 @socketio.on('start')
 def start(data):
@@ -65,18 +69,28 @@ def start(data):
 @socketio.on('hit')
 def hit(data):
     player = current_app.players[session['me']]
+    current_app.pre_player_act = session['me'] + ' '
     if player.points() == float("-inf") or player.points() == float("inf") \
         or player.points() == 21: # busted or blackjack or 21 points, pass to next player
         if current_app.cur_order == len(current_app.players_order) - 1:
             current_app.cur_order = 0
         else:
             current_app.cur_order += 1
+        current_app.pre_player_act += 'passed'
     else: # get new card
         player.draw(current_app.deck)
+        if player.points() == float("-inf") or player.points() == float("inf") \
+            or player.points() == 21: # busted or blackjack or 21 points, pass to next player
+            if current_app.cur_order == len(current_app.players_order) - 1:
+                current_app.cur_order = 0
+            else:
+                current_app.cur_order += 1
+        current_app.pre_player_act += 'got new card'
     socketio.emit('server done', {'msg': 'done'})
     
 @socketio.on('stand')   
 def stand(data):
+    current_app.pre_player_act = session['me'] + ' passed'
     if current_app.cur_order == len(current_app.players_order) - 1:
         current_app.cur_order = 0
     else:

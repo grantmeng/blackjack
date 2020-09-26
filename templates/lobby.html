@@ -8,7 +8,7 @@
    <body>
       <center>
          <div class="header">
-            <h5>You joined as {{me}} ({{players[me].ip}})</h5>
+            <h5>You joined as {{me}}</h5>
             Your hand: {{players[me].showHand()}}<br>
             Points: 
             {% if players[me].points() < 0 %}
@@ -33,15 +33,14 @@
                Waiting for players ...
                <input id="start" class="submit" type="button" value="START" />
             {% else %}
-               <h5>Game started: {{players_order}}, current order: {{cur_order}}</h5>
                {% if me == players_order[cur_order] %}
                   Your turn: <input id="hit" class="submit" type="button" value="HIT" />
-                              <input id="stand" class="submit" type="button" value="STAND" />
-                              <div id="response"></div>
+                             <input id="stand" class="submit" type="button" value="STAND" />
                {% else %}
                   Waiting for {{players_order[cur_order]}} ...
                {% endif %}
             {% endif %}
+            <p><font size=5>{{pre_player_act}}</font></p>
          </div>
       </center>
    </body>
