@@ -23,24 +23,13 @@
       <font color=blue size="7">
          {% for name in players_order %}
             {% if name != me %}
-               <p>{{name}}: {{players[name].showFirstCard()}}</p>
+               <p>{{name}}: {{players[name].showHand()}}</p>
             {% endif %}
          {% endfor %}
       </font>
       <center>
-         <div id="dynamic">
-            {% if not start_game %}
-               Waiting for players ...
-               <input id="start" class="submit" type="button" value="START" />
-            {% else %}
-               {% if me == players_order[cur_order] %}
-                  Your turn: <input id="hit" class="submit" type="button" value="HIT" />
-                           <input id="stand" class="submit" type="button" value="STAND" />
-               {% else %}
-                  Waiting for {{players_order[cur_order]}} ...
-               {% endif %}
-            {% endif %}
-            <p><font size=5>{{pre_player_act}}</font></p>
+         <div id='dynamic'>
+            Game Finished.
          </div>
       </center>
    </body>

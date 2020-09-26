@@ -21,4 +21,10 @@ $(document).ready(function() {
    socket.on('server done', function(msg) {
       location.reload();
    });
+
+   // handle 'result page' event sent from server
+   socket.on('result', function(msg) {
+      alert("didnt work");
+      window.location.replace("/result")
+   });
 });

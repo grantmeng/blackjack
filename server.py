@@ -1,4 +1,5 @@
 import random
+import operator
 from config import *
 from CardGame import *
 from flask import Flask, request, render_template, url_for, session, current_app
@@ -13,13 +14,25 @@ with app.app_context():
     current_app.players_order = []
     current_app.start_game = False
     current_app.cur_order = 0
-    current_app.pre_player_act = ''
+    current_app.reply = ''
 socketio = SocketIO(app, logger=True)
 
 @app.route('/')
 def index():
     session['me'] = None # initialize curren user name, this is client session
     return render_template('join.html')
+
+@app.route('/result')
+def result():
+    return render_template('result.html',
+        me=session['me'],
+        players=current_app.players, 
+        players_order=current_app.players_order,
+        cur_order=current_app.cur_order,
+        start_game=current_app.start_game,
+        reply=current_app.reply)
+
+    
 
 @app.route('/join', methods=['POST', 'GET'])
 def join():
@@ -30,7 +43,7 @@ def join():
             players_order=current_app.players_order,
             cur_order=current_app.cur_order,
             start_game=current_app.start_game,
-            pre_player_act=current_app.pre_player_act)
+            reply=current_app.reply)
     username = request.form['username']
     ip = request.remote_addr
     if username in current_app.players:
@@ -43,7 +56,7 @@ def join():
                 players_order=current_app.players_order,
                 cur_order=current_app.cur_order,
                 start_game=current_app.start_game,
-                pre_player_act=current_app.pre_player_act)
+                reply=current_app.reply)
     # create a new player
     if len(current_app.players) >= MAX_PLAYERS:
         return render_template('join.html', err_msg='Already reached maximum %s players.' % MAX_PLAYERS)
@@ -58,7 +71,7 @@ def join():
         players_order=current_app.players_order,
         cur_order=current_app.cur_order,
         start_game=current_app.start_game,
-        pre_player_act=current_app.pre_player_act)
+        reply=current_app.reply)
 
 @socketio.on('start')
 def start(data):
@@ -69,33 +82,43 @@ def start(data):
 @socketio.on('hit')
 def hit(data):
     player = current_app.players[session['me']]
-    current_app.pre_player_act = session['me'] + ' '
+    current_app.reply = session['me'] + ' '
     if player.points() == float("-inf") or player.points() == float("inf") \
         or player.points() == 21: # busted or blackjack or 21 points, pass to next player
         if current_app.cur_order == len(current_app.players_order) - 1:
-            current_app.cur_order = 0
+            socketio.emit('result', {'msg': 'done'})
+            return
         else:
             current_app.cur_order += 1
-        current_app.pre_player_act += 'passed'
+        current_app.reply += 'passed'
     else: # get new card
         player.draw(current_app.deck)
         if player.points() == float("-inf") or player.points() == float("inf") \
             or player.points() == 21: # busted or blackjack or 21 points, pass to next player
             if current_app.cur_order == len(current_app.players_order) - 1:
-                current_app.cur_order = 0
+                socketio.emit('result', {'msg': 'done'})
+                return
             else:
                 current_app.cur_order += 1
-        current_app.pre_player_act += 'got new card'
+        current_app.reply += 'got new card'
     socketio.emit('server done', {'msg': 'done'})
-    
+
 @socketio.on('stand')   
 def stand(data):
-    current_app.pre_player_act = session['me'] + ' passed'
-    if current_app.cur_order == len(current_app.players_order) - 1:
-        current_app.cur_order = 0
+    current_app.reply = session['me'] + ' passed'
+    if current_app.players_order[-1] == session['me']:
+        socketio.emit('result', {'msg': 'done'})
     else:
         current_app.cur_order += 1
-    socketio.emit('server done', {'msg': 'done'})
+        socketio.emit('server done', {'msg': 'done'})
+
+def win():
+    w = max(current_app.players.values())
+    winners = []
+    for p in current_app.players:
+        if p.points() == w:
+            winners.append(p)
+    return winners
 
 if __name__ == '__main__':
     #app.run(SERVER, PORT, DEBUG)
