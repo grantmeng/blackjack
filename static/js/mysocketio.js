@@ -22,9 +22,19 @@ $(document).ready(function() {
       socket.emit('restart', 'restart');
    });
 
+   // RESET button was clicked
+   $("#reset").click(function () {
+      socket.emit('reset', 'reset');
+   });
+
    // handle 'continue' event sent from server
    socket.on('continue', function(msg) {
       location.reload();
+   });
+
+   // handle 'result page' event sent from server
+   socket.on('result', function(msg) {
+      window.location.replace("/result")
    });
 
    // handle 'restart' event sent from server
@@ -32,8 +42,8 @@ $(document).ready(function() {
       window.location.replace("/join");
    });
 
-   // handle 'result page' event sent from server
-   socket.on('result', function(msg) {
-      window.location.replace("/result")
+   // handle 'reset' event sent from server
+   socket.on('reset', function(msg) {
+      window.location.replace("/");
    });
 });

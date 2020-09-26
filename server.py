@@ -8,13 +8,17 @@ from flask_socketio import SocketIO, emit
 app = Flask(__name__)
 app.secret_key = 'blackjack' # has to be set to use session, which is a client side session
 # initialize application wide variables, which are shared among all users/requests
-with app.app_context():
-    current_app.deck = Deck(); current_app.deck.shuffle()
-    current_app.players = {}
-    current_app.players_order = []
-    current_app.start_game = False
-    current_app.cur_order = 0
-    current_app.reply = ''
+
+def init():
+    with app.app_context():
+        current_app.deck = Deck(); current_app.deck.shuffle()
+        current_app.players = {}
+        current_app.players_order = []
+        current_app.start_game = False
+        current_app.cur_order = 0
+        current_app.reply = ''
+
+init()
 socketio = SocketIO(app, logger=True)
 
 @app.route('/')
@@ -110,6 +114,11 @@ def restart(data):
         p.resetHand()
         for _ in range(2): p.draw(current_app.deck)
     socketio.emit('restart', {'msg': 'done'})
+
+@socketio.on('reset')
+def reset(data):
+    init()
+    socketio.emit('reset', {'msg': 'done'})
 
 def win():
     scores = [p.points() for p in current_app.players.values()]
