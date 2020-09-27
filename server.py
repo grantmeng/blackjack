@@ -68,7 +68,17 @@ def join():
 @socketio.on('start')
 def start(data):
     current_app.start_game = True
-    random.shuffle(current_app.players_order)
+    if len(current_app.players) == 1: # add Dealer
+        dealer = Player('Dealer')
+        for _ in range(2): dealer.draw(current_app.deck)
+        current_app.players['Dealer'] = dealer
+        current_app.players_order = ['Dealer'] + current_app.players_order
+         # dealer stop hit if points >= 18 or busted, pass to next player
+        while current_app.players['Dealer'].points() != float('-inf') and current_app.players['Dealer'].points() < 18:
+            current_app.players['Dealer'].draw(current_app.deck)
+        current_app.cur_order += 1
+    else:
+        random.shuffle(current_app.players_order)
     socketio.emit('continue', {'msg': 'done'})
 
 @socketio.on('hit')
@@ -80,8 +90,10 @@ def hit(data):
         if current_app.cur_order == len(current_app.players_order) - 1:
             socketio.emit('result', {'msg': 'done'})
             return
-        else:
-            current_app.cur_order += 1
+        if 'Dealer' in current_app.players: # play with Dealer
+            socketio.emit('result', {'msg': 'done'})
+            return
+        current_app.cur_order += 1
         current_app.reply += 'passed'
     else: # get new card
         player.draw(current_app.deck)
@@ -90,8 +102,10 @@ def hit(data):
             if current_app.cur_order == len(current_app.players_order) - 1:
                 socketio.emit('result', {'msg': 'done'})
                 return
-            else:
-                current_app.cur_order += 1
+            if 'Dealer' in current_app.players: # play with Dealer
+                socketio.emit('result', {'msg': 'done'})
+                return
+            current_app.cur_order += 1
         current_app.reply += 'got new card'
     socketio.emit('continue', {'msg': 'done'})
 
@@ -100,19 +114,28 @@ def stand(data):
     current_app.reply = session['me'] + ' passed'
     if current_app.players_order[-1] == session['me']:
         socketio.emit('result', {'msg': 'done'})
-    else:
-        current_app.cur_order += 1
-        socketio.emit('continue', {'msg': 'done'})
+        return
+    if 'Dealer' in current_app.players: # play with Dealer
+        socketio.emit('result', {'msg': 'done'})
+        return
+    current_app.cur_order += 1
+    socketio.emit('continue', {'msg': 'done'})
 
 @socketio.on('restart')   
 def restart(data):
     current_app.reply = ''
     current_app.cur_order = 0
     current_app.deck.shuffle()
-    random.shuffle(current_app.players_order)
     for p in current_app.players.values():
         p.resetHand()
         for _ in range(2): p.draw(current_app.deck)
+    if 'Dealer' in current_app.players: # play with Dealer
+         # dealer stop hit if points >= 18 or busted, pass to next player
+        while current_app.players['Dealer'].points() != float('-inf') and current_app.players['Dealer'].points() < 18:
+            current_app.players['Dealer'].draw(current_app.deck)
+        current_app.cur_order += 1
+    else:
+        random.shuffle(current_app.players_order)
     socketio.emit('restart', {'msg': 'done'})
 
 @socketio.on('reset')
