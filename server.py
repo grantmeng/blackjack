@@ -32,9 +32,10 @@ socketio = SocketIO(app, logger=True)
 def index():
     if current_app.reset:
         session['me'] = None
+        init()
         current_app.reset = False
         return render_template('join.html')
-    if 'me' in session and session['me']:
+    if 'me' in session and session['me'] and session['me'] in current_app.players:
         return render_template('lobby.html', 
             me=session['me'], 
             players=current_app.players, 
