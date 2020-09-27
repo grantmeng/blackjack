@@ -23,22 +23,25 @@ def init():
         current_app.cur_order = 1 # dealer is done, start with other players
         current_app.start_game = False
         current_app.reply = ''
+        current_app.reset = True # used for reset event only
 
 init()
 socketio = SocketIO(app, logger=True)
 
 @app.route('/')
 def index():
-    if 'me' in session and session['me']: # client already logged in
-        return render_template('lobby.html', 
-            me=session['me'], 
-            players=current_app.players, 
-            players_order=current_app.players_order,
-            cur_order=current_app.cur_order,
-            start_game=current_app.start_game,
-            reply=current_app.reply)
-    session['me'] = None
-    return render_template('join.html')
+    if current_app.reset:
+        session['me'] = None
+        current_app.reset = False
+        return render_template('join.html')
+
+    return render_template('lobby.html', 
+        me=session['me'], 
+        players=current_app.players, 
+        players_order=current_app.players_order,
+        cur_order=current_app.cur_order,
+        start_game=current_app.start_game,
+        reply=current_app.reply)
 
 @app.route('/join', methods=['POST', 'GET'])
 def join():
@@ -64,16 +67,16 @@ def join():
                 cur_order=current_app.cur_order,
                 start_game=current_app.start_game,
                 reply=current_app.reply)
+    session['me'] = username # set current user session
     # create a new player
     if len(current_app.players) >= MAX_PLAYERS:
         return render_template('join.html', err_msg='Already reached maximum %s players.' % MAX_PLAYERS)
-    session['me'] = username # set current user session
     player = Player(username); player.ip = ip
     for _ in range(2): player.draw(current_app.deck)
     current_app.players[username] = player
     current_app.players_order.append(username)
     return render_template('lobby.html', 
-        me=username, 
+        me=session['me'], 
         players=current_app.players, 
         players_order=current_app.players_order,
         cur_order=current_app.cur_order,
