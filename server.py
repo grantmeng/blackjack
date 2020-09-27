@@ -34,14 +34,16 @@ def index():
         session['me'] = None
         current_app.reset = False
         return render_template('join.html')
-
-    return render_template('lobby.html', 
-        me=session['me'], 
-        players=current_app.players, 
-        players_order=current_app.players_order,
-        cur_order=current_app.cur_order,
-        start_game=current_app.start_game,
-        reply=current_app.reply)
+    if 'me' in session and session['me']:
+        return render_template('lobby.html', 
+            me=session['me'], 
+            players=current_app.players, 
+            players_order=current_app.players_order,
+            cur_order=current_app.cur_order,
+            start_game=current_app.start_game,
+            reply=current_app.reply)
+    session['me'] = None
+    return render_template('join.html')
 
 @app.route('/join', methods=['POST', 'GET'])
 def join():
@@ -134,6 +136,14 @@ def restart(data):
         p.resetHand()
         for _ in range(2): p.draw(current_app.deck)
     socketio.emit('restart', {'msg': 'done'})
+
+@socketio.on('next')
+def next(data):
+    if current_app.cur_order == len(current_app.players_order) - 1:
+        socketio.emit('result', {'msg': 'done'})
+        return
+    current_app.cur_order += 1
+    socketio.emit('continue', {'msg': 'done'})
 
 @socketio.on('reset')
 def reset(data):

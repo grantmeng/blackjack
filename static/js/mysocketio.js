@@ -2,6 +2,11 @@ $(document).ready(function() {
    // The http vs. https is important. Use http for localhost!
    var socket = io.connect('http://' + document.domain + ':' + location.port);
 
+   // timeout if no user action, pass to next user
+   var timeout = setTimeout(function () {
+      socket.emit('next', 'next');
+   }, 10000);
+
    // START button was clicked
    $("#start").click(function () {
       socket.emit('start', 'start');
@@ -9,11 +14,13 @@ $(document).ready(function() {
 
    // HIT button was clicked
    $("#hit").click(function () {
+      clearTimeout(timeout);
       socket.emit('hit', 'hit');
    });
 
    // STAND button was clicked
    $("#stand").click(function () {
+      clearTimeout(timeout);
       socket.emit('stand', 'stand');
    });
 
