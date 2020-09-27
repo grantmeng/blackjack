@@ -25,18 +25,6 @@
                {{players[me].points()}}
             {% endif %}
          </div>
-      </center>
-      <font color=blue size="7" style="font-family: Arial">
-         {% for name in players_order %}
-            {% if name != me %}
-               {{name}}:
-               <div class="hand">
-                  <div class="card {{players[name].hand[0].suit_name}}"><p>{{players[name].hand[0].name}}</p></div>
-               </div>
-            {% endif %}
-         {% endfor %}
-      </font>
-      <center>
          <div id="dynamic">
             {% if not start_game %}
                Waiting for players ...
@@ -52,5 +40,16 @@
             <p><font size=5>{{reply}}</font></p>
          </div>
       </center>
+      <div id='others'>
+         {% for name in players_order %}
+            {% if name != me %}
+               {{name}}:
+               <div class="hand">
+                  <div class="card {{players[name].hand[0].suit_name}}"><p>{{players[name].hand[0].name}}</p></div>
+               </div>
+            {% endif %}
+            <br>
+         {% endfor %}
+      </div>
    </body>
 </html>

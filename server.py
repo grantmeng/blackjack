@@ -2,7 +2,7 @@ import random
 import operator
 from config import *
 from CardGame import *
-from flask import Flask, request, render_template, url_for, session, current_app
+from flask import Flask, request, render_template, redirect, url_for, session, current_app
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
@@ -13,9 +13,15 @@ def init():
     with app.app_context():
         current_app.deck = Deck(); current_app.deck.shuffle()
         current_app.players = {}
-        current_app.players_order = []
+        # add dealer first
+        current_app.players['Dealer'] = Player('Dealer')
+        for _ in range(2): current_app.players['Dealer'].draw(current_app.deck)
+        current_app.players_order = ['Dealer']
+        # dealer stop hit if points >= 17 or busted, pass to next player
+        while current_app.players['Dealer'].points() != float('-inf') and current_app.players['Dealer'].points() < 17:
+            current_app.players['Dealer'].draw(current_app.deck)
+        current_app.cur_order = 1 # dealer is done, start with other players
         current_app.start_game = False
-        current_app.cur_order = 0
         current_app.reply = ''
 
 init()
@@ -23,7 +29,10 @@ socketio = SocketIO(app, logger=True)
 
 @app.route('/')
 def index():
-    session['me'] = None # initialize curren user name, this is client session
+    #session['me'] = None # initialize curren user name, this is client session
+    if 'me' in session: # client already logged in
+        return redirect(url_for('join'))
+    session['me'] = ''
     return render_template('join.html')
 
 @app.route('/join', methods=['POST', 'GET'])
@@ -68,17 +77,7 @@ def join():
 @socketio.on('start')
 def start(data):
     current_app.start_game = True
-    if len(current_app.players) == 1: # add Dealer
-        dealer = Player('Dealer')
-        for _ in range(2): dealer.draw(current_app.deck)
-        current_app.players['Dealer'] = dealer
-        current_app.players_order = ['Dealer'] + current_app.players_order
-         # dealer stop hit if points >= 18 or busted, pass to next player
-        while current_app.players['Dealer'].points() != float('-inf') and current_app.players['Dealer'].points() < 18:
-            current_app.players['Dealer'].draw(current_app.deck)
-        current_app.cur_order += 1
-    else:
-        random.shuffle(current_app.players_order)
+    # random.shuffle(current_app.players_order) # no need shuffle, take turn by joining order, dealer always first
     socketio.emit('continue', {'msg': 'done'})
 
 @socketio.on('hit')
@@ -90,9 +89,6 @@ def hit(data):
         if current_app.cur_order == len(current_app.players_order) - 1:
             socketio.emit('result', {'msg': 'done'})
             return
-        if 'Dealer' in current_app.players: # play with Dealer
-            socketio.emit('result', {'msg': 'done'})
-            return
         current_app.cur_order += 1
         current_app.reply += 'passed'
     else: # get new card
@@ -102,9 +98,6 @@ def hit(data):
             if current_app.cur_order == len(current_app.players_order) - 1:
                 socketio.emit('result', {'msg': 'done'})
                 return
-            if 'Dealer' in current_app.players: # play with Dealer
-                socketio.emit('result', {'msg': 'done'})
-                return
             current_app.cur_order += 1
         current_app.reply += 'got new card'
     socketio.emit('continue', {'msg': 'done'})
@@ -112,10 +105,7 @@ def hit(data):
 @socketio.on('stand')   
 def stand(data):
     current_app.reply = session['me'] + ' passed'
-    if current_app.players_order[-1] == session['me']:
-        socketio.emit('result', {'msg': 'done'})
-        return
-    if 'Dealer' in current_app.players: # play with Dealer
+    if current_app.cur_order == len(current_app.players_order) - 1:
         socketio.emit('result', {'msg': 'done'})
         return
     current_app.cur_order += 1
@@ -123,19 +113,18 @@ def stand(data):
 
 @socketio.on('restart')   
 def restart(data):
-    current_app.reply = ''
-    current_app.cur_order = 0
     current_app.deck.shuffle()
+    current_app.players['Dealer'].resetHand()
+    for _ in range(2): current_app.players['Dealer'].draw(current_app.deck)
+    # dealer stop hit if points >= 17 or busted, pass to next player
+    while current_app.players['Dealer'].points() != float('-inf') and current_app.players['Dealer'].points() < 17:
+        current_app.players['Dealer'].draw(current_app.deck)
+    current_app.cur_order = 1 # dealer is done, start with other players
+    current_app.reply = ''
     for p in current_app.players.values():
+        if p.name == 'Dealer': continue # dealer is done
         p.resetHand()
         for _ in range(2): p.draw(current_app.deck)
-    if 'Dealer' in current_app.players: # play with Dealer
-         # dealer stop hit if points >= 18 or busted, pass to next player
-        while current_app.players['Dealer'].points() != float('-inf') and current_app.players['Dealer'].points() < 18:
-            current_app.players['Dealer'].draw(current_app.deck)
-        current_app.cur_order += 1
-    else:
-        random.shuffle(current_app.players_order)
     socketio.emit('restart', {'msg': 'done'})
 
 @socketio.on('reset')

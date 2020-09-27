@@ -25,8 +25,14 @@
                {{players[me].points()}}
             {% endif %}
          </div>
+         <div id='dynamic'>
+            Game finished. The winner(s) are: {{winners}}
+         </div>
+         <p></p>
+         <p><input id="restart" class="submit" type="button" value="RESTART" /></p>
+         <p><input id="reset" class="submit" type="button" value="RESET" /></p>
       </center>
-      <font color=blue size="7">
+      <div id='others'>
          {% for name in players_order %}
             {% if name != me %}
                {{name}}:
@@ -36,15 +42,8 @@
                {% endfor %}
                </div>
             {% endif %}
+            <br>
          {% endfor %}
-      </font>
-      <center>
-         <div id='dynamic'>
-            Game finished. The winner(s) are: {{winners}}
-         </div>
-         <p></p>
-         <p><input id="restart" class="submit" type="button" value="RESTART" /></p>
-         <p><input id="reset" class="submit" type="button" value="RESET" /></p>
-      </center>
+      </div>
    </body>
 </html>

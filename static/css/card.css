@@ -1,14 +1,9 @@
-* {margin: 0; padding: 0;}
-body {
-  background: grey;
-}
-
 .card {
   position: relative;
   float: left;
   margin-right: 10px;
-  width: 80px;
-  height: 120px;
+  width: 70px;
+  height: 110px;
   border-radius: 10px;
   background: #fff;
   -webkit-box-shadow: 3px 3px 7px rgba(0,0,0,0.3);
@@ -16,7 +11,7 @@ body {
 }
 .card p {
   text-align: center;
-  font: 50px Arial;
+  font: 40px Arial;
   font-weight: bolder;
 }
 
