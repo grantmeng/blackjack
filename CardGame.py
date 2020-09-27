@@ -3,14 +3,18 @@ import collections
 from Rules import *
 
 class Card:
-    SPADES = chr(9824)
-    HEARTS = chr(9825)
-    DIAMONDS = chr(9826)
-    CLUBS = chr(9827)
+    SPADES = '\u2660'
+    HEARTS = '\u2665'
+    DIAMONDS = '\u2666'
+    CLUBS = '\u2663'
 
     def __init__(self, name, suit, value):
         self.name = name
         self.suit = suit
+        self.suit_name = 'clubs'
+        if suit == Card.SPADES: self.suit_name = 'spades'
+        elif suit == Card.HEARTS: self.suit_name = 'hearts'
+        elif suit == Card.DIAMONDS: self.suit_name = 'diamonds'
         self.value = value
 
     def show(self):

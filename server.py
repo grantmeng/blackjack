@@ -7,8 +7,8 @@ from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.secret_key = 'blackjack' # has to be set to use session, which is a client side session
-# initialize application wide variables, which are shared among all users/requests
 
+# initialize application wide variables, which are shared among all users/requests
 def init():
     with app.app_context():
         current_app.deck = Deck(); current_app.deck.shuffle()
