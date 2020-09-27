@@ -29,10 +29,15 @@ socketio = SocketIO(app, logger=True)
 
 @app.route('/')
 def index():
-    #session['me'] = None # initialize curren user name, this is client session
-    if 'me' in session: # client already logged in
-        return redirect(url_for('join'))
-    session['me'] = ''
+    if 'me' in session and session['me']: # client already logged in
+        return render_template('lobby.html', 
+            me=session['me'], 
+            players=current_app.players, 
+            players_order=current_app.players_order,
+            cur_order=current_app.cur_order,
+            start_game=current_app.start_game,
+            reply=current_app.reply)
+    session['me'] = None
     return render_template('join.html')
 
 @app.route('/join', methods=['POST', 'GET'])
@@ -51,6 +56,7 @@ def join():
         if ip != current_app.players[username].ip: # new user with duplicate name
             return render_template('join.html', err_msg='Player %s already exists, use another name.' % username)
         else: # same user logged in
+            session['me'] = username
             return render_template('lobby.html', 
                 me=username, 
                 players=current_app.players, 
@@ -83,14 +89,13 @@ def start(data):
 @socketio.on('hit')
 def hit(data):
     player = current_app.players[session['me']]
-    current_app.reply = session['me'] + ' '
     if player.points() == float("-inf") or player.points() == float("inf") \
         or player.points() == 21: # busted or blackjack or 21 points, pass to next player
         if current_app.cur_order == len(current_app.players_order) - 1:
             socketio.emit('result', {'msg': 'done'})
             return
         current_app.cur_order += 1
-        current_app.reply += 'passed'
+        current_app.reply = session['me'] + ' passed'
     else: # get new card
         player.draw(current_app.deck)
         if player.points() == float("-inf") or player.points() == float("inf") \
@@ -99,7 +104,7 @@ def hit(data):
                 socketio.emit('result', {'msg': 'done'})
                 return
             current_app.cur_order += 1
-        current_app.reply += 'got new card'
+        current_app.reply = session['me'] + ' got new card'
     socketio.emit('continue', {'msg': 'done'})
 
 @socketio.on('stand')   

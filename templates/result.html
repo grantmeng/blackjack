@@ -28,9 +28,7 @@
          <div id='dynamic'>
             Game finished. The winner(s) are: {{winners}}
          </div>
-         <p></p>
-         <p><input id="restart" class="submit" type="button" value="RESTART" /></p>
-         <p><input id="reset" class="submit" type="button" value="RESET" /></p>
+         <br><input id="restart" class="submit" type="button" value="RESTART" />
       </center>
       <div id='others'>
          {% for name in players_order %}
@@ -45,5 +43,6 @@
             <br>
          {% endfor %}
       </div>
+      <center><input id="reset" class="submit" type="button" value="RESET" /></center>
    </body>
 </html>

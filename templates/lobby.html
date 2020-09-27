@@ -31,14 +31,14 @@
                <input id="start" class="submit" type="button" value="START" />
             {% else %}
                {% if me == players_order[cur_order] %}
-                  Your turn: <input id="hit" class="submit" type="button" value="HIT" />
-                           <input id="stand" class="submit" type="button" value="STAND" />
+                  Your turn: <input id="hit" class="submit" type="button" value="HIT" />&nbsp;&nbsp;&nbsp;
+                             <input id="stand" class="submit" type="button" value="STAND" />
                {% else %}
                   Waiting for {{players_order[cur_order]}} ...
                {% endif %}
             {% endif %}
-            <p><font size=5>{{reply}}</font></p>
-         </div>
+         </div><br>
+         <div id='reply'>{{reply}}</div>
       </center>
       <div id='others'>
          {% for name in players_order %}
