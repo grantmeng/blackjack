@@ -50,6 +50,13 @@ class Deck:
             self.done.append(card)
         return hand
 
+    def removeCard(self, suit, value):
+        for i in range(len(self.cards)):
+            if self.cards[i].suit == suit and self.cards[i].value == value:
+                self.done.append(self.cards[i])
+                self.cards.pop(i)
+                return self.done[-1]
+
     def isEmpty(self):
         return self.cards == []
 
@@ -84,10 +91,10 @@ class Player:
             return '{}{}'.format(self.hand[0].suit, self.hand[0].name)
         return ''
 
-    def getHandbySuit(self):
+    def getHandBySuit(self):
         cards = collections.defaultdict(list)
         for card in self.hand:
-            cards[card.suit].append(card.name)
+            cards[card.suit_name].append(card.name)
         return cards
 
     def showHandBySuit(self):
