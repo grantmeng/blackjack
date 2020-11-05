@@ -44,5 +44,5 @@ jobs:
       - name: Test image
         run: |
           docker run --rm -d --name blackjack_container -p 5000:5000 blackjack
-          docker run --link test_container:test_container waisbrot/wait
+          docker run --link blackjack_container:blackjack_container waisbrot/wait
           curl --fail http://localhost:5000
