@@ -1,5 +1,5 @@
-import random
-import operator
+#import random 
+#import operator
 from config import *
 from CardGame import *
 from flask import Flask, request, render_template, redirect, url_for, session, current_app
