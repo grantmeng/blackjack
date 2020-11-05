@@ -3,3 +3,4 @@
 .aws
 .env
 .cache
+__pycache__/
