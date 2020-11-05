@@ -159,7 +159,7 @@ def win():
         if p.points() == w:
             winners.append(p.name)
     return ', '.join(winners)
-
+ 
 @app.route('/result')
 def result():
     winners = win()
