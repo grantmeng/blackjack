@@ -1,7 +1,5 @@
-import sys
-sys.path.insert(0, '/home/bear/py/blackjack')
-from app import app as flask_app
 import pytest
+from app import app as flask_app
 
 @pytest.fixture
 def app():
